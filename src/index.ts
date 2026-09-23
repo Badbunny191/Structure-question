@@ -12,7 +12,7 @@ app.get('/', (c) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แบบทบทวนหน้าที่และอำนาจของส่วนราชการภายใน สตง.</title>
+  <title>แบบสอบถามเรื่องการทบทวนหน้าที่และอำนาจของส่วนราชการภายใน สตง.</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,32 +22,59 @@ app.get('/', (c) => {
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen">
-  <!-- Main Container: ล็อกความกว้างทุกกล่องไว้ที่ max-w-5xl จัดกึ่งกลางจอ -->
   <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
-    <!-- 1. Header -->
-    <header class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <!-- Header -->
+    <header class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
           <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
             สำนักงานการตรวจเงินแผ่นดิน
           </span>
           <h1 class="text-2xl font-bold text-slate-900 mt-2">
-            แบบทบทวนหน้าที่และอำนาจของส่วนราชการภายใน สตง.
+            แบบสอบถามเรื่องการทบทวนหน้าที่และอำนาจของส่วนราชการภายใน สตง.
           </h1>
           <p class="text-sm text-slate-500 mt-1">
-            เพื่อใช้เป็นข้อมูลประกอบการทบทวนโครงสร้างส่วนราชการ (จำนวน 141 สำนัก)
+            เพื่อใช้เป็นข้อมูลประกอบการทบทวนโครงสร้างการแบ่งส่วนราชการภายใน สตง. (จำนวน 141 สำนัก)
           </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-shrink-0">
           <a href="/api/export" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition shadow-sm">
             ดาวน์โหลดผลลัพธ์ (Excel/CSV)
           </a>
         </div>
       </div>
+
+      <!-- Instruction / Objective Card -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-700 bg-slate-50 p-5 rounded-xl border border-slate-200">
+        <div class="space-y-4">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm mb-1 text-blue-700">วัตถุประสงค์</h3>
+            <p class="leading-relaxed text-slate-600">
+              เพื่อสำรวจการดำเนินงานตามหน้าที่และอำนาจที่กำหนดไว้ในปัจจุบัน ปัญหา/อุปสรรค ความเหมาะสมในการคงไว้หรือปรับปรุง และรวบรวมข้อเสนอหน้าที่และอำนาจใหม่ เพื่อใช้เป็นข้อมูลประกอบการทบทวนโครงสร้างส่วนราชการ
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-200">
+            <h3 class="font-bold text-slate-900 text-sm mb-1">แหล่งข้อมูล</h3>
+            <p class="leading-relaxed text-slate-600">
+              ประกาศคณะกรรมการตรวจเงินแผ่นดิน เรื่อง การแบ่งส่วนราชการภายในและขอบเขตหน้าที่และอำนาจของส่วนราชการภายในสำนักงานการตรวจเงินแผ่นดิน พ.ศ. ๒๕๖๖ และไฟล์แก้ไข/เพิ่มเติมที่ได้รับ
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-sm mb-2">วิธีตอบแบบสอบถาม</h3>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-600 leading-relaxed">
+            <li>พิจารณาหน้าที่และอำนาจแต่ละข้อจากข้อเท็จจริงของหน่วยงานในช่วงที่ผ่านมา แล้วเลือก <span class="font-semibold text-slate-800">“มี”</span> หรือ <span class="font-semibold text-slate-800">“ไม่มี”</span></li>
+            <li>หากมีปัญหา/อุปสรรค โปรดระบุโดยสังเขป และพิจารณาว่าควร <span class="font-semibold text-slate-800">“คงไว้ / ปรับปรุง/แก้ไข / ไม่ควรคงไว้”</span></li>
+            <li><span class="font-semibold text-slate-800">ส่วนที่ 2:</span> ให้เสนอหน้าที่และอำนาจใหม่ที่เห็นว่าควรกำหนดเพิ่มเติม พร้อมเหตุผลและรายละเอียดโดยสังเขป</li>
+            <li>แบบสอบถามนี้จัดทำเพื่อเป็นข้อมูลประกอบการทบทวนโครงสร้าง <span class="text-rose-600 font-medium">มิใช่การประเมินผลการปฏิบัติงาน</span></li>
+          </ol>
+        </div>
+      </div>
     </header>
 
-    <!-- 2. Search Box (Combobox) -->
+    <!-- Unified Search Box -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-3">
       <h2 class="text-base font-bold text-slate-900">ค้นหาและเลือกสำนักของท่าน</h2>
       <div class="relative">
@@ -56,25 +83,21 @@ app.get('/', (c) => {
             type="text"
             id="deptSearchInput"
             autocomplete="off"
-            placeholder="คลิกเพื่อดูรายชื่อทั้งหมด หรือพิมพ์ค้นหา (เช่น คดี, เชียงใหม่, 007)..."
-            class="w-full p-3.5 pl-11 pr-10 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner cursor-pointer"
+            placeholder="พิมพ์ชื่อสำนัก, จังหวัด หรือรหัสสำนัก (เช่น คดี, เชียงใหม่, 007)..."
+            class="w-full p-3.5 pl-11 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner"
           />
-          <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <div id="btnToggleDropdown" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
         </div>
 
-        <div id="suggestionsList" class="hidden absolute z-30 left-0 right-0 mt-1.5 max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100"></div>
+        <!-- Autocomplete Suggestions List -->
+        <div id="suggestionsList" class="hidden absolute z-30 left-0 right-0 mt-1.5 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100"></div>
       </div>
-      <p class="text-xs text-slate-400">คลิกที่ช่องเพื่อดูรายชื่อทั้งหมด หรือพิมพ์ค้นหาแล้วคลิกเลือกเพื่อเปิดแบบสอบถามทันที</p>
+      <p class="text-xs text-slate-400">คลิกที่ผลลัพธ์เพื่อเปิดแบบสอบถามทันที</p>
     </section>
 
-    <!-- 3. Survey Form Container (อยู่ภายใน max-w-5xl แล้ว) -->
+    <!-- Survey Form Container -->
     <div id="surveyContainer" class="hidden space-y-6">
 
       <div id="statusBanner" class="hidden p-4 rounded-xl text-sm font-medium"></div>
@@ -93,11 +116,11 @@ app.get('/', (c) => {
         </button>
       </div>
 
-      <!-- ส่วนที่ 1: รายการอำนาจหน้าที่ -->
+      <!-- ส่วนที่ 1: รายการอำนาจหน้าที่แบบ Card View กล่องใหญ่เต็มจอ -->
       <section class="space-y-4">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 class="text-lg font-bold text-slate-900">ส่วนที่ 1: ทบทวนหน้าที่และอำนาจที่กำหนดไว้ในปัจจุบัน</h3>
-          <p class="text-xs text-slate-500 mt-1">พิจารณาข้อเท็จจริงตามการปฏิบัติงาน ปัญหาอุปสรรค และความเหมาะสมในการคงไว้</p>
+          <p class="text-xs text-slate-500 mt-1">พิจารณาข้อเท็จจริงตามการปฏิบัติงาน ปัญหาอุปสรรค และความเหมาะสมในการคงไว้ <span class="text-rose-500 font-medium">(จำเป็นต้องเลือก "การดำเนินการ" และ "ความเห็นการคงไว้" ทุกข้อ)</span></p>
         </div>
 
         <div id="mandatesListContainer" class="space-y-4"></div>
@@ -175,7 +198,6 @@ app.get('/', (c) => {
     const btnSaveDraft = document.getElementById('btnSaveDraft');
     const btnSubmit = document.getElementById('btnSubmit');
     const saveFeedback = document.getElementById('saveFeedback');
-    const btnToggleDropdown = document.getElementById('btnToggleDropdown');
 
     async function initialize() {
       try {
@@ -186,13 +208,18 @@ app.get('/', (c) => {
       }
     }
 
-    function showSuggestions(q) {
-      q = (q || '').trim().toLowerCase();
-      const matches = q 
-        ? departmentsData.filter(function(d) {
-            return d.name.toLowerCase().includes(q) || d.id.includes(q);
-          })
-        : departmentsData;
+    // ระบบค้นหาและแสดง Autocomplete Dropdown
+    deptSearchInput.addEventListener('input', function(e) {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) {
+        suggestionsList.classList.add('hidden');
+        suggestionsList.innerHTML = '';
+        return;
+      }
+
+      const matches = departmentsData.filter(function(d) {
+        return d.name.toLowerCase().includes(q) || d.id.includes(q);
+      });
 
       if (matches.length === 0) {
         suggestionsList.innerHTML = '<div class="p-4 text-xs text-slate-400 text-center">ไม่พบสำนักที่ค้นหา</div>';
@@ -213,7 +240,7 @@ app.get('/', (c) => {
         }
 
         item.innerHTML = '<div class="flex items-center gap-2">' +
-            '<span class="font-mono text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded">[' + d.id + ']</span>' +
+            '<span class="font-mono text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-bold">[' + d.id + ']</span>' +
             '<span class="font-medium text-slate-800">' + d.name + '</span>' +
           '</div>' + badgeHtml;
 
@@ -225,33 +252,11 @@ app.get('/', (c) => {
       });
 
       suggestionsList.classList.remove('hidden');
-    }
-
-    deptSearchInput.addEventListener('focus', function() {
-      this.select();
-      showSuggestions('');
     });
 
-    deptSearchInput.addEventListener('click', function() {
-      showSuggestions(this.value.includes(']') ? '' : this.value);
-    });
-
-    deptSearchInput.addEventListener('input', function(e) {
-      showSuggestions(e.target.value);
-    });
-
-    btnToggleDropdown.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (suggestionsList.classList.contains('hidden')) {
-        deptSearchInput.focus();
-        showSuggestions('');
-      } else {
-        suggestionsList.classList.add('hidden');
-      }
-    });
-
+    // ซ่อน Dropdown เมื่อคลิกนอกกล่องค้นหา
     document.addEventListener('click', function(e) {
-      if (!deptSearchInput.contains(e.target) && !suggestionsList.contains(e.target) && !btnToggleDropdown.contains(e.target)) {
+      if (!deptSearchInput.contains(e.target) && !suggestionsList.contains(e.target)) {
         suggestionsList.classList.add('hidden');
       }
     });
@@ -295,36 +300,34 @@ app.get('/', (c) => {
           const disabledAttr = isLocked ? 'disabled' : '';
 
           card.innerHTML = 
-            '<div class="space-y-4">' +
-              '<div class="flex items-start gap-3">' +
-                '<span class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">' + m.item_order + '</span>' +
-                '<div class="text-sm font-semibold text-slate-900 leading-relaxed pt-1">' + m.content + '</div>' +
+            '<div class="flex items-start gap-3">' +
+              '<span class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">' + m.item_order + '</span>' +
+              '<div class="text-sm font-medium text-slate-800 leading-relaxed pt-1">' + m.content + '</div>' +
+            '</div>' +
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">' +
+              '<div class="flex items-center gap-3">' +
+                '<span class="text-xs font-semibold text-slate-600">การดำเนินการ: <span class="text-rose-500">*</span></span>' +
+                '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="มี" ' + actionYesChecked + ' ' + disabledAttr + ' class="text-blue-600" /> มี</label>' +
+                '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="ไม่มี" ' + actionNoChecked + ' ' + disabledAttr + ' class="text-blue-600" /> ไม่มี</label>' +
               '</div>' +
-              '<div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50/70 rounded-xl border border-slate-100 items-center">' +
-                '<div class="flex items-center gap-4">' +
-                  '<span class="text-xs font-bold text-slate-700 whitespace-nowrap">การดำเนินการ:</span>' +
-                  '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="มี" ' + actionYesChecked + ' ' + disabledAttr + ' class="text-blue-600" /> มี</label>' +
-                  '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="ไม่มี" ' + actionNoChecked + ' ' + disabledAttr + ' class="text-blue-600" /> ไม่มี</label>' +
-                '</div>' +
-                '<div class="flex items-center justify-between md:justify-end gap-4">' +
-                  '<span class="text-xs font-bold text-slate-700 whitespace-nowrap">ความเห็นการคงไว้:</span>' +
-                  '<select class="p-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-blue-500 w-full md:w-52" ' + disabledAttr + '>' +
-                    '<option value="">-- โปรดเลือก --</option>' +
-                    '<option value="คงไว้" ' + (resp.keep_status === 'คงไว้' ? 'selected' : '') + '>คงไว้</option>' +
-                    '<option value="ปรับปรุง/แก้ไข" ' + (resp.keep_status === 'ปรับปรุง/แก้ไข' ? 'selected' : '') + '>ปรับปรุง/แก้ไข</option>' +
-                    '<option value="ไม่ควรคงไว้" ' + (resp.keep_status === 'ไม่ควรคงไว้' ? 'selected' : '') + '>ไม่ควรคงไว้</option>' +
-                  '</select>' +
-                '</div>' +
+              '<div class="flex items-center gap-3">' +
+                '<span class="text-xs font-semibold text-slate-600">ความเห็นการคงไว้: <span class="text-rose-500">*</span></span>' +
+                '<select class="p-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-blue-500 w-full md:w-48" ' + disabledAttr + '>' +
+                  '<option value="">-- โปรดเลือก --</option>' +
+                  '<option value="คงไว้" ' + (resp.keep_status === 'คงไว้' ? 'selected' : '') + '>คงไว้</option>' +
+                  '<option value="ปรับปรุง/แก้ไข" ' + (resp.keep_status === 'ปรับปรุง/แก้ไข' ? 'selected' : '') + '>ปรับปรุง/แก้ไข</option>' +
+                  '<option value="ไม่ควรคงไว้" ' + (resp.keep_status === 'ไม่ควรคงไว้' ? 'selected' : '') + '>ไม่ควรคงไว้</option>' +
+                '</select>' +
               '</div>' +
-              '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">' +
-                '<div>' +
-                  '<label class="block text-xs font-semibold text-slate-600 mb-1.5">ปัญหา / อุปสรรคในการดำเนินการ (ถ้ามี)</label>' +
-                  '<textarea rows="3" class="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner" placeholder="ระบุปัญหาหรืออุปสรรค..." ' + disabledAttr + '>' + (resp.problems || '') + '</textarea>' +
-                '</div>' +
-                '<div>' +
-                  '<label class="block text-xs font-semibold text-slate-600 mb-1.5">ข้อเสนอแนะ / รายละเอียดเพิ่มเติม</label>' +
-                  '<textarea rows="3" class="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner" placeholder="ระบุข้อเสนอแนะเพิ่มเติม..." ' + disabledAttr + '>' + (resp.suggestion || '') + '</textarea>' +
-                '</div>' +
+            '</div>' +
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+              '<div>' +
+                '<label class="block text-xs font-semibold text-slate-600 mb-1">ปัญหา / อุปสรรคในการดำเนินการ (ถ้ามี)</label>' +
+                '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุปัญหาหรืออุปสรรค..." ' + disabledAttr + '>' + (resp.problems || '') + '</textarea>' +
+              '</div>' +
+              '<div>' +
+                '<label class="block text-xs font-semibold text-slate-600 mb-1">ข้อเสนอแนะ / รายละเอียดเพิ่มเติม</label>' +
+                '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุข้อเสนอแนะเพิ่มเติม..." ' + disabledAttr + '>' + (resp.suggestion || '') + '</textarea>' +
               '</div>' +
             '</div>';
 
@@ -403,14 +406,61 @@ app.get('/', (c) => {
       if (!isLocked) {
         const delBtn = div.querySelector('.btn-del-proposal');
         if (delBtn) {
-          delBtn.addEventListener('click', function() { div.remove(); });
+          delBtn.onclick = function() { div.remove(); };
         }
       }
 
       proposalsContainer.appendChild(div);
     }
 
-    btnAddProposal.addEventListener('click', function() { addProposalRow('', '', false); });
+    btnAddProposal.onclick = function() { addProposalRow('', '', false); };
+
+    function validateForm() {
+      const cards = mandatesListContainer.querySelectorAll('.mandate-card');
+      let isValid = true;
+      let firstErrorCard = null;
+
+      cards.forEach(function(c) {
+        const actionRadio = c.querySelector('input[type="radio"]:checked');
+        const keepSelect = c.querySelector('select');
+
+        c.classList.remove('border-rose-500', 'bg-rose-50/20');
+
+        const isActionChecked = !!actionRadio;
+        const isKeepSelected = keepSelect && keepSelect.value !== '';
+
+        if (!isActionChecked || !isKeepSelected) {
+          isValid = false;
+          c.classList.add('border-rose-500', 'bg-rose-50/20');
+          if (!firstErrorCard) {
+            firstErrorCard = c;
+          }
+        }
+      });
+
+      if (!isValid) {
+        alert('กรุณาเลือก "การดำเนินการ" (มี หรือ ไม่มี) และ "ความเห็นการคงไว้" ให้ครบถ้วนทุกข้อ');
+        if (firstErrorCard) {
+          firstErrorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return false;
+      }
+
+      const nameVal = respName.value.trim();
+      const posVal = respPosition.value.trim();
+      const phoneVal = respPhone.value.trim();
+
+      if (!nameVal || !posVal || !phoneVal) {
+        alert('กรุณากรอกข้อมูล "ส่วนที่ 3: ข้อมูลผู้ตอบแบบสอบถาม / ผู้ประสานงาน" (ชื่อ-นามสกุล, ตำแหน่ง, เบอร์โทรศัพท์) ให้ครบถ้วน');
+        respName.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (!nameVal) respName.focus();
+        else if (!posVal) respPosition.focus();
+        else respPhone.focus();
+        return false;
+      }
+
+      return true;
+    }
 
     function collectPayload() {
       const cards = mandatesListContainer.querySelectorAll('.mandate-card');
@@ -419,7 +469,8 @@ app.get('/', (c) => {
         const mandateId = parseInt(c.dataset.mandateId, 10);
         const actionRadio = c.querySelector('input[type="radio"]:checked');
         const hasAction = actionRadio ? actionRadio.value : '';
-        const keepStatus = c.querySelector('select').value;
+        const keepSelect = c.querySelector('select');
+        const keepStatus = keepSelect ? keepSelect.value : '';
         const textareas = c.querySelectorAll('textarea');
         const problems = textareas[0].value.trim();
         const suggestion = textareas[1].value.trim();
@@ -456,13 +507,13 @@ app.get('/', (c) => {
     }
 
     async function sendData(isSubmit) {
+      if (!validateForm()) {
+        return;
+      }
+
       const payload = collectPayload();
 
       if (isSubmit) {
-        if (!payload.respondentName || !payload.respondentPosition || !payload.respondentPhone) {
-          alert('โปรดระบุข้อมูลส่วนที่ 3 (ชื่อ, ตำแหน่ง, เบอร์โทรศัพท์) ให้ครบถ้วนก่อนส่งแบบสอบถาม');
-          return;
-        }
         const confirmSend = confirm('ยืนยันส่งแบบสอบถามของสำนักนี้หรือไม่?\\nเมื่อส่งแล้วจะไม่สามารถกลับมาแก้ไขได้');
         if (!confirmSend) return;
       }
