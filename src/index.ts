@@ -199,60 +199,83 @@ app.get('/', (c) => {
     const btnSubmit = document.getElementById('btnSubmit');
     const saveFeedback = document.getElementById('saveFeedback');
 
-    async function initialize() {
-      try {
-        const res = await fetch('/api/depts');
-        departmentsData = await res.json();
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการโหลดรายชื่อสำนัก');
-      }
-    }
+  async function initialize() {
+  try {
+    const res = await fetch('/api/depts');
+    departmentsData = await res.json();
+  } catch (err) {
+    alert('เกิดข้อผิดพลาดในการโหลดรายชื่อสำนัก');
+  }
+}
 
     // ระบบค้นหาและแสดง Autocomplete Dropdown
-    deptSearchInput.addEventListener('input', function(e) {
-      const q = e.target.value.trim().toLowerCase();
-      if (!q) {
-        suggestionsList.classList.add('hidden');
-        suggestionsList.innerHTML = '';
-        return;
-      }
+    function renderSuggestions(searchText = '') {
+  const q = searchText.trim().toLowerCase();
 
-      const matches = departmentsData.filter(function(d) {
-        return d.name.toLowerCase().includes(q) || d.id.includes(q);
-      });
+  let matches = departmentsData;
 
-      if (matches.length === 0) {
-        suggestionsList.innerHTML = '<div class="p-4 text-xs text-slate-400 text-center">ไม่พบสำนักที่ค้นหา</div>';
-        suggestionsList.classList.remove('hidden');
-        return;
-      }
-
-      suggestionsList.innerHTML = '';
-      matches.forEach(function(d) {
-        const item = document.createElement('div');
-        item.className = 'p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between text-sm transition';
-        
-        let badgeHtml = '';
-        if (d.status === 'submitted') {
-          badgeHtml = '<span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-semibold">ส่งแล้ว</span>';
-        } else if (d.status === 'draft') {
-          badgeHtml = '<span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-semibold">กำลังร่าง</span>';
-        }
-
-        item.innerHTML = '<div class="flex items-center gap-2">' +
-            '<span class="font-mono text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-bold">[' + d.id + ']</span>' +
-            '<span class="font-medium text-slate-800">' + d.name + '</span>' +
-          '</div>' + badgeHtml;
-
-        item.addEventListener('click', function() {
-          selectDepartment(d.id, d.name);
-        });
-
-        suggestionsList.appendChild(item);
-      });
-
-      suggestionsList.classList.remove('hidden');
+  if (q) {
+    matches = departmentsData.filter(function(d) {
+      return (
+        d.name.toLowerCase().includes(q) ||
+        d.id.includes(q)
+      );
     });
+  }
+
+  if (matches.length === 0) {
+    suggestionsList.innerHTML =
+      '<div class="p-4 text-xs text-slate-400 text-center">ไม่พบสำนักที่ค้นหา</div>';
+
+    suggestionsList.classList.remove('hidden');
+    return;
+  }
+
+  suggestionsList.innerHTML = '';
+
+  matches.forEach(function(d) {
+    const item = document.createElement('div');
+
+    item.className =
+      'p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between text-sm transition';
+
+    let badgeHtml = '';
+
+    if (d.status === 'submitted') {
+      badgeHtml =
+        '<span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-semibold">ส่งแล้ว</span>';
+    } else if (d.status === 'draft') {
+      badgeHtml =
+        '<span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-semibold">กำลังร่าง</span>';
+    }
+
+    item.innerHTML =
+      '<div class="flex items-center gap-2">' +
+      '<span class="font-mono text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-bold">[' +
+      d.id +
+      ']</span>' +
+      '<span class="font-medium text-slate-800">' +
+      d.name +
+      '</span>' +
+      '</div>' +
+      badgeHtml;
+
+    item.addEventListener('click', function() {
+      selectDepartment(d.id, d.name);
+    });
+
+    suggestionsList.appendChild(item);
+  });
+
+  suggestionsList.classList.remove('hidden');
+}
+  deptSearchInput.addEventListener('input', function(e) {
+  renderSuggestions(e.target.value);
+});
+
+deptSearchInput.addEventListener('focus', function() {
+  renderSuggestions('');
+});
 
     // ซ่อน Dropdown เมื่อคลิกนอกกล่องค้นหา
     document.addEventListener('click', function(e) {
@@ -260,7 +283,9 @@ app.get('/', (c) => {
         suggestionsList.classList.add('hidden');
       }
     });
+  
 
+  
     async function selectDepartment(deptId, deptName) {
       currentDeptId = deptId;
       deptSearchInput.value = '[' + deptId + '] ' + deptName;
@@ -269,9 +294,10 @@ app.get('/', (c) => {
     }
 
     btnChangeDept.addEventListener('click', function() {
-      surveyContainer.classList.add('hidden');
-      deptSearchInput.value = '';
-      deptSearchInput.focus();
+     surveyContainer.classList.add('hidden');
+    deptSearchInput.value = '';
+    renderSuggestions('');
+    deptSearchInput.focus();
     });
 
     async function loadDepartmentSurvey(deptId) {
