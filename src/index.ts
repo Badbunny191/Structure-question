@@ -6,7 +6,6 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// 1. หน้าแสดงผลเว็บแอปพลิเคชัน (Frontend Single Page)
 app.get('/', (c) => {
   return c.html(`<!DOCTYPE html>
 <html lang="th">
@@ -22,9 +21,11 @@ app.get('/', (c) => {
     body { font-family: 'Sarabun', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-  <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <!-- Main Container: ล็อกความกว้างทุกกล่องไว้ที่ max-w-5xl จัดกึ่งกลางจอ -->
+  <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
+    <!-- 1. Header -->
     <header class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -39,102 +40,110 @@ app.get('/', (c) => {
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <a href="/api/export" target="_blank" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
+          <a href="/api/export" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition shadow-sm">
             ดาวน์โหลดผลลัพธ์ (Excel/CSV)
           </a>
         </div>
       </div>
     </header>
 
-    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
-      <h2 class="text-base font-bold text-slate-900">เลือกส่วนราชการ / สำนักของท่าน</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">ค้นหาชื่อสำนักหรือจังหวัด</label>
-          <input type="text" id="deptSearchInput" placeholder="พิมพ์คำค้น เช่น วินัย, เชียงใหม่, ภูมิภาคที่ 1..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+    <!-- 2. Search Box (Combobox) -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-3">
+      <h2 class="text-base font-bold text-slate-900">ค้นหาและเลือกสำนักของท่าน</h2>
+      <div class="relative">
+        <div class="relative">
+          <input
+            type="text"
+            id="deptSearchInput"
+            autocomplete="off"
+            placeholder="คลิกเพื่อดูรายชื่อทั้งหมด หรือพิมพ์ค้นหา (เช่น คดี, เชียงใหม่, 007)..."
+            class="w-full p-3.5 pl-11 pr-10 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner cursor-pointer"
+          />
+          <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <div id="btnToggleDropdown" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">รายชื่อสำนัก (141 สำนัก)</label>
-          <select id="deptSelect" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-            <option value="">-- โปรดเลือกสำนัก --</option>
-          </select>
-        </div>
+
+        <div id="suggestionsList" class="hidden absolute z-30 left-0 right-0 mt-1.5 max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100"></div>
       </div>
+      <p class="text-xs text-slate-400">คลิกที่ช่องเพื่อดูรายชื่อทั้งหมด หรือพิมพ์ค้นหาแล้วคลิกเลือกเพื่อเปิดแบบสอบถามทันที</p>
     </section>
 
+    <!-- 3. Survey Form Container (อยู่ภายใน max-w-5xl แล้ว) -->
     <div id="surveyContainer" class="hidden space-y-6">
 
       <div id="statusBanner" class="hidden p-4 rounded-xl text-sm font-medium"></div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div class="flex items-center gap-3">
-          <span id="deptCodeBadge" class="text-xs font-mono font-bold px-2.5 py-1 bg-blue-100 text-blue-800 rounded"></span>
-          <h2 id="deptNameDisplay" class="text-xl font-bold text-slate-900"></h2>
+      <!-- Dept Header Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="deptCodeBadge" class="text-xs font-mono font-bold px-2.5 py-1 bg-blue-100 text-blue-800 rounded"></span>
+            <h2 id="deptNameDisplay" class="text-xl font-bold text-slate-900"></h2>
+          </div>
+          <p id="deptRefDisplay" class="text-xs text-slate-500 mt-1.5"></p>
         </div>
-        <p id="deptRefDisplay" class="text-xs text-slate-500 mt-1"></p>
+        <button type="button" id="btnChangeDept" class="text-xs text-blue-600 hover:text-blue-800 font-semibold self-start sm:self-auto">
+          เปลี่ยนสำนัก
+        </button>
       </div>
 
-      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
-        <div>
+      <!-- ส่วนที่ 1: รายการอำนาจหน้าที่ -->
+      <section class="space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 class="text-lg font-bold text-slate-900">ส่วนที่ 1: ทบทวนหน้าที่และอำนาจที่กำหนดไว้ในปัจจุบัน</h3>
-          <p class="text-xs text-slate-500">พิจารณาข้อเท็จจริงตามการปฏิบัติงาน ปัญหาอุปสรรค และความเหมาะสมในการคงไว้</p>
+          <p class="text-xs text-slate-500 mt-1">พิจารณาข้อเท็จจริงตามการปฏิบัติงาน ปัญหาอุปสรรค และความเหมาะสมในการคงไว้</p>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr class="bg-slate-100 text-slate-700 text-xs border-b border-slate-200">
-                <th class="p-3 w-12 text-center">ข้อ</th>
-                <th class="p-3 w-2/5">หน้าที่และอำนาจตามประกาศ</th>
-                <th class="p-3 w-32 text-center">การดำเนินการ</th>
-                <th class="p-3">ปัญหา / อุปสรรค</th>
-                <th class="p-3 w-36 text-center">ความเห็นการคงไว้</th>
-                <th class="p-3">ข้อเสนอแนะเพิ่มเติม</th>
-              </tr>
-            </thead>
-            <tbody id="mandatesTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
+        <div id="mandatesListContainer" class="space-y-4"></div>
       </section>
 
+      <!-- ส่วนที่ 2: ข้อเสนอใหม่ -->
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-lg font-bold text-slate-900">ส่วนที่ 2: ข้อเสนอหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม (ถ้ามี)</h3>
-            <p class="text-xs text-slate-500">ระบุภารกิจหรืออำนาจหน้าที่ที่เห็นควรให้กำหนดเพิ่มเติม พร้อมเหตุผลความจำเป็น</p>
+            <p class="text-xs text-slate-500 mt-0.5">ระบุภารกิจหรืออำนาจหน้าที่ที่เห็นควรให้กำหนดเพิ่มเติม พร้อมเหตุผลความจำเป็น</p>
           </div>
-          <button type="button" id="btnAddProposal" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
-            + เพิ่มข้อเสนอ
+          <button type="button" id="btnAddProposal" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+            + เพิ่มข้อเสนอใหม่
           </button>
         </div>
-        <div id="proposalsContainer" class="space-y-3"></div>
+        <div id="proposalsContainer" class="space-y-4"></div>
       </section>
 
+      <!-- ส่วนที่ 3: ข้อมูลผู้ตอบ -->
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
         <h3 class="text-lg font-bold text-slate-900">ส่วนที่ 3: ข้อมูลผู้ตอบแบบสอบถาม / ผู้ประสานงาน</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">ชื่อ - นามสกุล <span class="text-rose-500">*</span></label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">ชื่อ - นามสกุล <span class="text-rose-500">*</span></label>
             <input type="text" id="respName" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น นายสมชาย ใจดี" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">ตำแหน่ง <span class="text-rose-500">*</span></label>
-            <input type="text" id="respPosition" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น นักทรัพยากรบุคคลชำนาญการพิเศษ" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">ตำแหน่ง <span class="text-rose-500">*</span></label>
+            <input type="text" id="respPosition" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น ผู้อำนวยการสำนัก..." />
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-500">*</span></label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-500">*</span></label>
             <input type="text" id="respPhone" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 02-xxx-xxxx ต่อ xxx" />
           </div>
         </div>
       </section>
 
-      <div class="sticky bottom-4 bg-white/95 backdrop-blur border border-slate-200 p-4 rounded-xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div id="saveFeedback" class="text-xs font-medium text-slate-600"></div>
+      <!-- Action Bar -->
+      <div class="sticky bottom-4 bg-white/95 backdrop-blur border border-slate-200 p-4 rounded-xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div id="saveFeedback" class="text-xs font-semibold text-slate-600"></div>
         <div class="flex items-center gap-3">
-          <button type="button" id="btnSaveDraft" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-sm font-semibold transition">
+          <button type="button" id="btnSaveDraft" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-sm font-semibold transition">
             บันทึกแบบร่าง
           </button>
-          <button type="button" id="btnSubmit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition shadow-sm">
+          <button type="button" id="btnSubmit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition shadow-md">
             ยืนยันส่งแบบสอบถาม
           </button>
         </div>
@@ -150,56 +159,114 @@ app.get('/', (c) => {
     let currentDeptStatus = 'not_started';
 
     const deptSearchInput = document.getElementById('deptSearchInput');
-    const deptSelect = document.getElementById('deptSelect');
+    const suggestionsList = document.getElementById('suggestionsList');
     const surveyContainer = document.getElementById('surveyContainer');
     const statusBanner = document.getElementById('statusBanner');
     const deptCodeBadge = document.getElementById('deptCodeBadge');
     const deptNameDisplay = document.getElementById('deptNameDisplay');
     const deptRefDisplay = document.getElementById('deptRefDisplay');
-    const mandatesTableBody = document.getElementById('mandatesTableBody');
+    const mandatesListContainer = document.getElementById('mandatesListContainer');
     const proposalsContainer = document.getElementById('proposalsContainer');
     const btnAddProposal = document.getElementById('btnAddProposal');
+    const btnChangeDept = document.getElementById('btnChangeDept');
     const respName = document.getElementById('respName');
     const respPosition = document.getElementById('respPosition');
     const respPhone = document.getElementById('respPhone');
     const btnSaveDraft = document.getElementById('btnSaveDraft');
     const btnSubmit = document.getElementById('btnSubmit');
     const saveFeedback = document.getElementById('saveFeedback');
+    const btnToggleDropdown = document.getElementById('btnToggleDropdown');
 
     async function initialize() {
       try {
         const res = await fetch('/api/depts');
         departmentsData = await res.json();
-        renderDeptOptions(departmentsData);
       } catch (err) {
         alert('เกิดข้อผิดพลาดในการโหลดรายชื่อสำนัก');
       }
     }
 
-    function renderDeptOptions(list) {
-      deptSelect.innerHTML = '<option value="">-- โปรดเลือกสำนัก --</option>';
-      list.forEach(dept => {
-        const opt = document.createElement('option');
-        opt.value = dept.id;
-        let badge = dept.status === 'submitted' ? ' [ส่งแล้ว]' : (dept.status === 'draft' ? ' [กำลังร่าง]' : '');
-        opt.textContent = dept.id + ': ' + dept.name + badge;
-        deptSelect.appendChild(opt);
-      });
-    }
+    function showSuggestions(q) {
+      q = (q || '').trim().toLowerCase();
+      const matches = q 
+        ? departmentsData.filter(function(d) {
+            return d.name.toLowerCase().includes(q) || d.id.includes(q);
+          })
+        : departmentsData;
 
-    deptSearchInput.addEventListener('input', (e) => {
-      const q = e.target.value.trim().toLowerCase();
-      const filtered = departmentsData.filter(d => d.name.toLowerCase().includes(q) || d.id.includes(q));
-      renderDeptOptions(filtered);
-    });
-
-    deptSelect.addEventListener('change', async (e) => {
-      currentDeptId = e.target.value;
-      if (!currentDeptId) {
-        surveyContainer.classList.add('hidden');
+      if (matches.length === 0) {
+        suggestionsList.innerHTML = '<div class="p-4 text-xs text-slate-400 text-center">ไม่พบสำนักที่ค้นหา</div>';
+        suggestionsList.classList.remove('hidden');
         return;
       }
-      await loadDepartmentSurvey(currentDeptId);
+
+      suggestionsList.innerHTML = '';
+      matches.forEach(function(d) {
+        const item = document.createElement('div');
+        item.className = 'p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between text-sm transition';
+        
+        let badgeHtml = '';
+        if (d.status === 'submitted') {
+          badgeHtml = '<span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-semibold">ส่งแล้ว</span>';
+        } else if (d.status === 'draft') {
+          badgeHtml = '<span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-semibold">กำลังร่าง</span>';
+        }
+
+        item.innerHTML = '<div class="flex items-center gap-2">' +
+            '<span class="font-mono text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded">[' + d.id + ']</span>' +
+            '<span class="font-medium text-slate-800">' + d.name + '</span>' +
+          '</div>' + badgeHtml;
+
+        item.addEventListener('click', function() {
+          selectDepartment(d.id, d.name);
+        });
+
+        suggestionsList.appendChild(item);
+      });
+
+      suggestionsList.classList.remove('hidden');
+    }
+
+    deptSearchInput.addEventListener('focus', function() {
+      this.select();
+      showSuggestions('');
+    });
+
+    deptSearchInput.addEventListener('click', function() {
+      showSuggestions(this.value.includes(']') ? '' : this.value);
+    });
+
+    deptSearchInput.addEventListener('input', function(e) {
+      showSuggestions(e.target.value);
+    });
+
+    btnToggleDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (suggestionsList.classList.contains('hidden')) {
+        deptSearchInput.focus();
+        showSuggestions('');
+      } else {
+        suggestionsList.classList.add('hidden');
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!deptSearchInput.contains(e.target) && !suggestionsList.contains(e.target) && !btnToggleDropdown.contains(e.target)) {
+        suggestionsList.classList.add('hidden');
+      }
+    });
+
+    async function selectDepartment(deptId, deptName) {
+      currentDeptId = deptId;
+      deptSearchInput.value = '[' + deptId + '] ' + deptName;
+      suggestionsList.classList.add('hidden');
+      await loadDepartmentSurvey(deptId);
+    }
+
+    btnChangeDept.addEventListener('click', function() {
+      surveyContainer.classList.add('hidden');
+      deptSearchInput.value = '';
+      deptSearchInput.focus();
     });
 
     async function loadDepartmentSurvey(deptId) {
@@ -216,42 +283,59 @@ app.get('/', (c) => {
         const isLocked = currentDeptStatus === 'submitted';
         updateLockUI(isLocked, data.dept);
 
-        mandatesTableBody.innerHTML = '';
-        data.mandates.forEach(m => {
-          const resp = data.responses.find(r => r.mandate_id === m.id) || {};
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-slate-50 transition';
-          tr.dataset.mandateId = m.id;
+        mandatesListContainer.innerHTML = '';
+        data.mandates.forEach(function(m) {
+          const resp = data.responses.find(function(r) { return r.mandate_id === m.id; }) || {};
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4 hover:border-slate-300 transition mandate-card';
+          card.dataset.mandateId = m.id;
 
           const actionYesChecked = resp.has_action === 'มี' ? 'checked' : '';
           const actionNoChecked = resp.has_action === 'ไม่มี' ? 'checked' : '';
           const disabledAttr = isLocked ? 'disabled' : '';
 
-          tr.innerHTML = '<td class="p-3 text-center font-medium text-slate-500">' + m.item_order + '</td>' +
-            '<td class="p-3 text-slate-700 text-xs leading-relaxed">' + m.content + '</td>' +
-            '<td class="p-3 text-center">' +
-              '<div class="inline-flex gap-2 text-xs">' +
-                '<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="action_' + m.id + '" value="มี" ' + actionYesChecked + ' ' + disabledAttr + ' /> มี</label>' +
-                '<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="action_' + m.id + '" value="ไม่มี" ' + actionNoChecked + ' ' + disabledAttr + ' /> ไม่มี</label>' +
+          card.innerHTML = 
+            '<div class="space-y-4">' +
+              '<div class="flex items-start gap-3">' +
+                '<span class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">' + m.item_order + '</span>' +
+                '<div class="text-sm font-semibold text-slate-900 leading-relaxed pt-1">' + m.content + '</div>' +
               '</div>' +
-            '</td>' +
-            '<td class="p-3"><textarea rows="2" class="w-full p-2 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-blue-500" placeholder="ระบุถ้ามี..." ' + disabledAttr + '>' + (resp.problems || '') + '</textarea></td>' +
-            '<td class="p-3 text-center">' +
-              '<select class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white" ' + disabledAttr + '>' +
-                '<option value="">-- เลือก --</option>' +
-                '<option value="คงไว้" ' + (resp.keep_status === 'คงไว้' ? 'selected' : '') + '>คงไว้</option>' +
-                '<option value="ปรับปรุง/แก้ไข" ' + (resp.keep_status === 'ปรับปรุง/แก้ไข' ? 'selected' : '') + '>ปรับปรุง/แก้ไข</option>' +
-                '<option value="ไม่ควรคงไว้" ' + (resp.keep_status === 'ไม่ควรคงไว้' ? 'selected' : '') + '>ไม่ควรคงไว้</option>' +
-              '</select>' +
-            '</td>' +
-            '<td class="p-3"><textarea rows="2" class="w-full p-2 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-blue-500" placeholder="ระบุเพิ่มเติม..." ' + disabledAttr + '>' + (resp.suggestion || '') + '</textarea></td>';
+              '<div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50/70 rounded-xl border border-slate-100 items-center">' +
+                '<div class="flex items-center gap-4">' +
+                  '<span class="text-xs font-bold text-slate-700 whitespace-nowrap">การดำเนินการ:</span>' +
+                  '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="มี" ' + actionYesChecked + ' ' + disabledAttr + ' class="text-blue-600" /> มี</label>' +
+                  '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="ไม่มี" ' + actionNoChecked + ' ' + disabledAttr + ' class="text-blue-600" /> ไม่มี</label>' +
+                '</div>' +
+                '<div class="flex items-center justify-between md:justify-end gap-4">' +
+                  '<span class="text-xs font-bold text-slate-700 whitespace-nowrap">ความเห็นการคงไว้:</span>' +
+                  '<select class="p-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-blue-500 w-full md:w-52" ' + disabledAttr + '>' +
+                    '<option value="">-- โปรดเลือก --</option>' +
+                    '<option value="คงไว้" ' + (resp.keep_status === 'คงไว้' ? 'selected' : '') + '>คงไว้</option>' +
+                    '<option value="ปรับปรุง/แก้ไข" ' + (resp.keep_status === 'ปรับปรุง/แก้ไข' ? 'selected' : '') + '>ปรับปรุง/แก้ไข</option>' +
+                    '<option value="ไม่ควรคงไว้" ' + (resp.keep_status === 'ไม่ควรคงไว้' ? 'selected' : '') + '>ไม่ควรคงไว้</option>' +
+                  '</select>' +
+                '</div>' +
+              '</div>' +
+              '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">' +
+                '<div>' +
+                  '<label class="block text-xs font-semibold text-slate-600 mb-1.5">ปัญหา / อุปสรรคในการดำเนินการ (ถ้ามี)</label>' +
+                  '<textarea rows="3" class="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner" placeholder="ระบุปัญหาหรืออุปสรรค..." ' + disabledAttr + '>' + (resp.problems || '') + '</textarea>' +
+                '</div>' +
+                '<div>' +
+                  '<label class="block text-xs font-semibold text-slate-600 mb-1.5">ข้อเสนอแนะ / รายละเอียดเพิ่มเติม</label>' +
+                  '<textarea rows="3" class="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-inner" placeholder="ระบุข้อเสนอแนะเพิ่มเติม..." ' + disabledAttr + '>' + (resp.suggestion || '') + '</textarea>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
 
-          mandatesTableBody.appendChild(tr);
+          mandatesListContainer.appendChild(card);
         });
 
         proposalsContainer.innerHTML = '';
         if (data.proposals && data.proposals.length > 0) {
-          data.proposals.forEach(p => addProposalRow(p.proposed_content, p.reason, isLocked));
+          data.proposals.forEach(function(p) {
+            addProposalRow(p.proposed_content, p.reason, isLocked);
+          });
         }
 
         respName.value = data.dept.respondent_name || '';
@@ -289,41 +373,56 @@ app.get('/', (c) => {
       }
     }
 
-    function addProposalRow(contentVal = '', reasonVal = '', isLocked = false) {
+    function addProposalRow(contentVal, reasonVal, isLocked) {
+      contentVal = contentVal || '';
+      reasonVal = reasonVal || '';
+      isLocked = !!isLocked;
+
       const div = document.createElement('div');
-      div.className = 'p-4 border border-slate-200 rounded-lg bg-slate-50/50 space-y-3 proposal-row';
+      div.className = 'p-5 border border-slate-200 rounded-xl bg-slate-50 space-y-3 proposal-row';
       const disabledAttr = isLocked ? 'disabled' : '';
 
-      div.innerHTML = '<div class="flex items-center justify-between">' +
-          '<span class="text-xs font-bold text-slate-700">ข้อเสนอใหม่</span>' +
-          (!isLocked ? '<button type="button" class="text-xs text-rose-600 hover:text-rose-800 font-semibold" onclick="this.closest(\x27.proposal-row\x27).remove()">ลบข้อนี้</button>' : '') +
-        '</div>' +
-        '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
+      let topHtml = '<div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-700">ข้อเสนอหน้าที่และอำนาจใหม่</span>';
+      if (!isLocked) {
+        topHtml += '<button type="button" class="text-xs text-rose-600 hover:text-rose-800 font-semibold btn-del-proposal">ลบข้อนี้</button>';
+      }
+      topHtml += '</div>';
+
+      div.innerHTML = topHtml +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
           '<div>' +
-            '<label class="block text-xs font-medium text-slate-600 mb-1">ข้อเสนอหน้าที่และอำนาจใหม่</label>' +
-            '<textarea rows="2" class="w-full p-2 border border-slate-300 rounded text-xs prop-content bg-white" placeholder="ระบุข้อความอำนาจหน้าที่..." ' + disabledAttr + '>' + contentVal + '</textarea>' +
+            '<label class="block text-xs font-semibold text-slate-600 mb-1.5">ข้อความหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม</label>' +
+            '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs prop-content bg-white" placeholder="ระบุข้อความอำนาจหน้าที่..." ' + disabledAttr + '>' + contentVal + '</textarea>' +
           '</div>' +
           '<div>' +
-            '<label class="block text-xs font-medium text-slate-600 mb-1">เหตุผลความจำเป็น / รายละเอียดโดยสังเขป</label>' +
-            '<textarea rows="2" class="w-full p-2 border border-slate-300 rounded text-xs prop-reason bg-white" placeholder="ระบุเหตุผล..." ' + disabledAttr + '>' + reasonVal + '</textarea>' +
+            '<label class="block text-xs font-semibold text-slate-600 mb-1.5">เหตุผลความจำเป็น / รายละเอียดโดยสังเขป</label>' +
+            '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs prop-reason bg-white" placeholder="ระบุเหตุผลความจำเป็น..." ' + disabledAttr + '>' + reasonVal + '</textarea>' +
           '</div>' +
         '</div>';
+
+      if (!isLocked) {
+        const delBtn = div.querySelector('.btn-del-proposal');
+        if (delBtn) {
+          delBtn.addEventListener('click', function() { div.remove(); });
+        }
+      }
 
       proposalsContainer.appendChild(div);
     }
 
-    btnAddProposal.addEventListener('click', () => addProposalRow());
+    btnAddProposal.addEventListener('click', function() { addProposalRow('', '', false); });
 
     function collectPayload() {
-      const rows = mandatesTableBody.querySelectorAll('tr');
+      const cards = mandatesListContainer.querySelectorAll('.mandate-card');
       const responses = [];
-      rows.forEach(r => {
-        const mandateId = parseInt(r.dataset.mandateId, 10);
-        const actionRadio = r.querySelector('input[type="radio"]:checked');
+      cards.forEach(function(c) {
+        const mandateId = parseInt(c.dataset.mandateId, 10);
+        const actionRadio = c.querySelector('input[type="radio"]:checked');
         const hasAction = actionRadio ? actionRadio.value : '';
-        const problems = r.querySelectorAll('textarea')[0].value.trim();
-        const keepStatus = r.querySelector('select').value;
-        const suggestion = r.querySelectorAll('textarea')[1].value.trim();
+        const keepStatus = c.querySelector('select').value;
+        const textareas = c.querySelectorAll('textarea');
+        const problems = textareas[0].value.trim();
+        const suggestion = textareas[1].value.trim();
 
         responses.push({
           mandateId: mandateId,
@@ -336,7 +435,7 @@ app.get('/', (c) => {
 
       const propRows = proposalsContainer.querySelectorAll('.proposal-row');
       const proposals = [];
-      propRows.forEach(pr => {
+      propRows.forEach(function(pr) {
         const cVal = pr.querySelector('.prop-content').value.trim();
         const rVal = pr.querySelector('.prop-reason').value.trim();
         if (cVal || rVal) {
@@ -377,7 +476,11 @@ app.get('/', (c) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...payload,
+            respondentName: payload.respondentName,
+            respondentPosition: payload.respondentPosition,
+            respondentPhone: payload.respondentPhone,
+            responses: payload.responses,
+            proposals: payload.proposals,
             isSubmit: isSubmit
           })
         });
@@ -393,11 +496,9 @@ app.get('/', (c) => {
 
         saveFeedback.textContent = isSubmit ? 'ส่งข้อมูลเรียบร้อยแล้ว' : 'บันทึกแบบร่างเรียบร้อยแล้ว';
         
-        const dItem = departmentsData.find(d => d.id === currentDeptId);
+        const dItem = departmentsData.find(function(d) { return d.id === currentDeptId; });
         if (dItem) {
           dItem.status = isSubmit ? 'submitted' : 'draft';
-          renderDeptOptions(departmentsData);
-          deptSelect.value = currentDeptId;
         }
 
         await loadDepartmentSurvey(currentDeptId);
@@ -410,8 +511,8 @@ app.get('/', (c) => {
       }
     }
 
-    btnSaveDraft.addEventListener('click', () => sendData(false));
-    btnSubmit.addEventListener('click', () => sendData(true));
+    btnSaveDraft.addEventListener('click', function() { sendData(false); });
+    btnSubmit.addEventListener('click', function() { sendData(true); });
 
     initialize();
   </script>
@@ -518,7 +619,7 @@ app.post('/api/dept/:id/save', async (c) => {
   return c.json({ success: true, status: newStatus });
 });
 
-// 5. API ส่งออกผลสรุปทั้งหมดเป็นไฟล์ CSV (เปิดภาษาไทยใน Excel ได้ทันที)
+// 5. API ส่งออกผลสรุปทั้งหมดเป็นไฟล์ CSV
 app.get('/api/export', async (c) => {
   const query = `
     SELECT 
