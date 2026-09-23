@@ -533,9 +533,11 @@ deptSearchInput.addEventListener('focus', function() {
     }
 
     async function sendData(isSubmit) {
+      if (isSubmit) {
       if (!validateForm()) {
         return;
       }
+    }
 
       const payload = collectPayload();
 
@@ -590,6 +592,37 @@ deptSearchInput.addEventListener('focus', function() {
 
     btnSaveDraft.addEventListener('click', function() { sendData(false); });
     btnSubmit.addEventListener('click', function() { sendData(true); });
+    // ฟังชัน auto save
+    setInterval(async function() {
+  if (!currentDeptId) return;
+
+  if (currentDeptStatus === 'submitted') return;
+
+  try {
+    const payload = collectPayload();
+
+    await fetch('/api/dept/' + currentDeptId + '/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        respondentName: payload.respondentName,
+        respondentPosition: payload.respondentPosition,
+        respondentPhone: payload.respondentPhone,
+        responses: payload.responses,
+        proposals: payload.proposals,
+        isSubmit: false
+      })
+    });
+
+    saveFeedback.textContent =
+      'บันทึกอัตโนมัติ ' +
+      new Date().toLocaleTimeString('th-TH');
+  } catch (err) {
+    console.error('Auto save failed', err);
+  }
+}, 30000);
 
     initialize();
   </script>
