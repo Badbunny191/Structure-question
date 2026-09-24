@@ -498,9 +498,7 @@ app.get('/', (c) => {
         return;
       }
 
-      // 3. Confirm
-      const confirmSend = confirm('ยืนยันส่งแบบสอบถามของสำนักนี้หรือไม่?\\nเมื่อส่งแล้วจะไม่สามารถกลับมาแก้ไขได้อีก');
-      if (!confirmSend) return;
+     
 
       // 4. Collect Data
       const responses = [];
@@ -536,7 +534,9 @@ for (const pr of proposalsContainer.querySelectorAll('.proposal-row')) {
     });
   }
 }
-
+//Confirm
+const confirmSend = confirm('ยืนยันส่งแบบสอบถามของสำนักนี้หรือไม่?\\nเมื่อส่งแล้วจะไม่สามารถกลับมาแก้ไขได้อีก');
+if (!confirmSend) return;
       const payload = {
         respondentName: rName,
         respondentPosition: rPos,
@@ -847,6 +847,21 @@ app.post('/api/dept/:id/submit', async (c) => {
   if (!Array.isArray(responses) || responses.length === 0) {
     return c.json({ error: 'ไม่พบข้อมูลคำตอบ' }, 400);
   }
+  if (Array.isArray(proposals)) {
+    for (const p of proposals) {
+    const hasContent = !!p.content?.trim();
+    const hasReason = !!p.reason?.trim();
+    if (hasContent !== hasReason) {
+    return c.json(
+    {
+    error:
+    'ข้อเสนอใหม่ต้องกรอกทั้งข้อความหน้าที่และอำนาจ และเหตุผลความจำเป็น'
+    },
+    400
+    );
+    }
+    }
+    }
   // Validation ความยาวข้อมูล
 if ((respondentName || '').length > 50) {
   return c.json({ error: 'ชื่อผู้ตอบต้องไม่เกิน 50 ตัวอักษร' }, 400);
