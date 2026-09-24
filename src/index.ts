@@ -821,7 +821,7 @@ app.post('/api/dept/:id/submit', async (c) => {
   const { respondentName, respondentPosition, respondentPhone, responses, proposals } = body;
   // Validation ความยาวข้อมูล
 if ((respondentName || '').length > 50) {
-  return c.json({ error: 'ชื่อผู้ตอบต้องไม่เกิน 5 ตัวอักษร' }, 400);
+  return c.json({ error: 'ชื่อผู้ตอบต้องไม่เกิน 50 ตัวอักษร' }, 400);
 }
 
 if ((respondentPosition || '').length > 50) {
