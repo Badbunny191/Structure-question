@@ -366,11 +366,11 @@ app.get('/', (c) => {
         if (data.dept.status === 'submitted') {
           // สำนักส่งแล้ว ล็อกทุกอย่างและซ่อนฟอร์ม ไม่แสดงข้อมูลใดๆ
           statusBanner.className = 'p-8 rounded-xl text-center bg-emerald-50 border border-emerald-200 block';
-          statusBanner.innerHTML = 
-            '<div class="text-4xl mb-3">✅</div>' +
-            '<h3 class="text-xl font-bold text-emerald-800">สำนักนี้ได้ส่งแบบสอบถามเรียบร้อยแล้ว</h3>' +
-            '<p class="text-sm font-medium text-emerald-600 mt-2">วันที่ส่ง: ' + (data.dept.submitted_at || '-') + '</p>' +
-            '<p class="text-xs text-slate-500 mt-6">หากต้องการแก้ไขข้อมูล กรุณาติดต่อผู้ดูแลระบบ</p>';
+          statusBanner.innerHTML =
+  '<div class="text-4xl mb-3">✅</div>' +
+  '<h3 class="text-xl font-bold text-emerald-800">[' + data.dept.id + '] ' + data.dept.name + ' ได้ส่งแบบสอบถามเรียบร้อยแล้ว</h3>' +
+  '<p class="text-sm font-medium text-emerald-600 mt-2">วันที่ส่ง: ' + (data.dept.submitted_at || '-') + '</p>' +
+  '<p class="text-xs text-slate-500 mt-6">หากต้องการแก้ไขข้อมูล กรุณาติดต่อสำนักบริหารทรัพยากรบุคคล กลุ่มงานอัตรากำลังฯ โทรภายใน 1210</p>';
           
           surveyFormArea.classList.add('hidden');
         } else {
