@@ -367,12 +367,12 @@ app.get('/', (c) => {
               '</div>' +
               '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">' +
                 '<div class="flex items-center gap-3">' +
-                  '<span class="text-xs font-semibold text-slate-600">การปฏิบัติงาน: <span class="text-rose-500">*</span></span>' +
+                  '<span class="text-xs font-semibold text-slate-600">หน่วยงานมีการดำเนินงานตามภารกิจนี้หรือไม่: <span class="text-rose-500">*</span></span>' +
                   '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="มี" class="text-blue-600" /> มี</label>' +
                   '<label class="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="radio" name="action_' + m.id + '" value="ไม่มี" class="text-blue-600" /> ไม่มี</label>' +
                 '</div>' +
                 '<div class="flex items-center gap-3">' +
-                  '<span class="text-xs font-semibold text-slate-600">ข้อคิดเห็นต่อหน้าที่และอำนาจนี้: <span class="text-rose-500">*</span></span>' +
+                  '<span class="text-xs font-semibold text-slate-600">ความเห็นต่อความเหมาะสมของภารกิจนี้: <span class="text-rose-500">*</span></span>' +
                   '<select class="p-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-blue-500 w-full md:w-48 keep-select">' +
                     '<option value="">-- โปรดเลือก --</option>' +
                     '<option value="คงไว้">คงไว้</option>' +
@@ -383,11 +383,11 @@ app.get('/', (c) => {
               '</div>' +
               '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
                 '<div>' +
-                  '<label class="block text-xs font-semibold text-slate-600 mb-1">ปัญหา / อุปสรรคในการปฏิบัติงาน (ถ้ามี)</label>' +
+                  '<label class="block text-xs font-semibold text-slate-600 mb-1">ปัญหา / อุปสรรคในการปฏิบัติงานตามภารกิจนี้ (ถ้ามี)</label>' +
                   '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุปัญหาหรืออุปสรรค..."></textarea>' +
                 '</div>' +
                 '<div>' +
-                  '<label class="block text-xs font-semibold text-slate-600 mb-1">ข้อเสนอแนะ / รายละเอียดเพิ่มเติม</label>' +
+                  '<label class="block text-xs font-semibold text-slate-600 mb-1">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label>' +
                   '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุข้อเสนอแนะเพิ่มเติม..."></textarea>' +
                 '</div>' +
               '</div>';
@@ -455,7 +455,7 @@ app.get('/', (c) => {
       });
 
       if (!isValid) {
-        alert('กรุณาเลือก "การปฏิบัติงาน" (มี หรือ ไม่มี) และ "ข้อคิดเห็นต่อหน้าที่และอำนาจนี้" ให้ครบถ้วนทุกข้อ');
+        alert('กรุณาเลือก "การดำเนินงานตามภารกิจนี้หรือไม่" (มี หรือ ไม่มี) และ "ความเห็นต่อความเหมาะสมของภารกิจนี้" ให้ครบถ้วนทุกข้อ');
         if (firstErrorCard) firstErrorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
@@ -911,7 +911,7 @@ app.get('/admin/view/:id', async (c) => {
     html += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
       <div class="font-semibold text-slate-800 mb-3">${m.item_order}. ${m.content}</div>
       <div class="grid grid-cols-2 gap-4 text-sm bg-blue-50/50 p-3 rounded-lg mb-3">
-        <div><strong>การปฏิบัติงาน:</strong> <span class="${r.has_action === 'มี' ? 'text-emerald-600' : 'text-rose-600'} font-bold">${r.has_action || '-'}</span></div>
+        <div><strong>หน่วยงานมีการดำเนินงานตามภารกิจนี้หรือไม่:</strong> <span class="${r.has_action === 'มี' ? 'text-emerald-600' : 'text-rose-600'} font-bold">${r.has_action || '-'}</span></div>
         <div><strong>ความเห็น:</strong> <span class="font-bold text-blue-700">${r.keep_status || '-'}</span></div>
       </div>
       <div class="grid grid-cols-2 gap-4 text-sm">
@@ -957,7 +957,7 @@ app.get('/api/export', async (c) => {
   `;
   const { results: resultsPart1 } = await c.env.DB.prepare(queryPart1).all();
 
-  const headersPart1 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ข้อที่', 'หน้าที่และอำนาจตามประกาศ', 'การปฏิบัติงาน', 'ปัญหา/อุปสรรค', 'ข้อคิดเห็นต่อหน้าที่และอำนาจนี้', 'ข้อเสนอแนะเพิ่มเติม'];
+  const headersPart1 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ข้อที่', 'หน้าที่และอำนาจตามประกาศ', 'หน่วยงานมีการดำเนินงานตามภารกิจนี้หรือไม่', 'ปัญหา/อุปสรรค', 'ข้อคิดเห็นต่อหน้าที่และอำนาจนี้', 'ข้อเสนอแนะเพิ่มเติม'];
   const dataPart1 = [headersPart1];
   for (const row of (resultsPart1 || [])) {
     dataPart1.push([
@@ -977,7 +977,7 @@ app.get('/api/export', async (c) => {
   `;
   const { results: resultsPart2 } = await c.env.DB.prepare(queryPart2).all();
 
-  const headersPart2 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ลำดับข้อเสนอ', 'ข้อความที่เสนอ', 'เหตุผลความจำเป็น'];
+  const headersPart2 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ลำดับข้อเสนอ', 'ข้อความหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม', 'เหตุผลความจำเป็น'];
   const dataPart2 = [headersPart2];
   for (const row of (resultsPart2 || [])) {
     dataPart2.push([
