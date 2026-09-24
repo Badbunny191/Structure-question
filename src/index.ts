@@ -8,7 +8,31 @@ type Bindings = {
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+//===========================================================================
+// ป้องกัน Stored XSS
+function escapeHtml(value: any): string {
+  if (value === null || value === undefined) return '';
 
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+//===========================================================================
+//Excel Formula Injection
+function safeExcel(value: any): string {
+  if (value === null || value === undefined) return '';
+
+  const str = String(value);
+
+  if (/^[=+\-@]/.test(str)) {
+    return "'" + str;
+  }
+
+  return str;
+}
 // =========================================================================
 // Helper Function: แปลงวันที่เป็นเวลาไทย (Asia/Bangkok)
 // =========================================================================
@@ -187,7 +211,7 @@ app.get('/', (c) => {
         <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-900">ส่วนที่ 2: ส่วนที่ 2: ข้อเสนอหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม (ถ้ามี)</h3>
+              <h3 class="text-lg font-bold text-slate-900">ส่วนที่ 2: ข้อเสนอหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม (ถ้ามี)</h3>
               <p class="text-xs text-slate-500 mt-0.5">ระบุหน้าที่และอำนาจหรือภารกิจที่เห็นควรให้กำหนดเพิ่มเติม พร้อมเหตุผลความจำเป็น</p>
             </div>
             <button type="button" id="btnAddProposal" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
@@ -898,10 +922,9 @@ app.get('/admin/view/:id', async (c) => {
   html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
     <h1 class="text-xl font-bold text-slate-900">[${dept.id}] ${dept.name}</h1>
     <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-slate-600 bg-slate-50 p-4 rounded-lg">
-      <div><strong>ผู้ตอบ:</strong> ${dept.respondent_name || '-'}</div>
-      <div><strong>ตำแหน่ง:</strong> ${dept.respondent_position || '-'}</div>
-      <div><strong>เบอร์โทรศัพท์:</strong> ${dept.respondent_phone || '-'}</div>
-      <div><strong>วันที่ส่ง:</strong> ${dept.submitted_at || '-'}</div>
+      <div><strong>ผู้ตอบ:</strong> ${escapeHtml(dept.respondent_name || '-')}</div>
+      <div><strong>ตำแหน่ง:</strong> ${escapeHtml(dept.respondent_position || '-')}</div>
+      <div><strong>เบอร์โทรศัพท์:</strong> ${escapeHtml(dept.respondent_phone || '-')}</div>
     </div>
   </div>`;
 
@@ -909,14 +932,14 @@ app.get('/admin/view/:id', async (c) => {
   mandates.results.forEach((m: any) => {
     const r = responses.results.find((r: any) => r.mandate_id === m.id) || {};
     html += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-      <div class="font-semibold text-slate-800 mb-3">${m.item_order}. ${m.content}</div>
+      <div class="font-semibold text-slate-800 mb-3">${m.item_order}. ${escapeHtml(m.content)}</div>
       <div class="grid grid-cols-2 gap-4 text-sm bg-blue-50/50 p-3 rounded-lg mb-3">
         <div><strong>หน่วยงานมีการดำเนินงานตามภารกิจนี้หรือไม่:</strong> <span class="${r.has_action === 'มี' ? 'text-emerald-600' : 'text-rose-600'} font-bold">${r.has_action || '-'}</span></div>
         <div><strong>ความเห็น:</strong> <span class="font-bold text-blue-700">${r.keep_status || '-'}</span></div>
       </div>
       <div class="grid grid-cols-2 gap-4 text-sm">
-        <div><strong>ปัญหา/อุปสรรค:</strong><div class="mt-1 text-slate-600">${r.problems || '-'}</div></div>
-        <div><strong>ข้อเสนอแนะ:</strong><div class="mt-1 text-slate-600">${r.suggestion || '-'}</div></div>
+        <div><strong>ปัญหา/อุปสรรค:</strong><div class="mt-1 text-slate-600">${escapeHtml(r.problems || '-')}</div></div>
+        <div><strong>ข้อเสนอแนะ:</strong><div class="mt-1 text-slate-600">${escapeHtml(r.suggestion || '-')}</div></div>
       </div>
     </div>`;
   });
@@ -929,8 +952,8 @@ app.get('/admin/view/:id', async (c) => {
     proposals.results.forEach((p: any, idx: number) => {
       html += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 text-sm">
         <div class="font-bold text-slate-800 mb-2">ข้อเสนอที่ ${idx + 1}</div>
-        <div class="mb-2"><strong>ข้อความที่เสนอ:</strong> <span class="text-slate-600">${p.proposed_content || '-'}</span></div>
-        <div><strong>เหตุผลความจำเป็น:</strong> <span class="text-slate-600">${p.reason || '-'}</span></div>
+        <div class="mb-2"><strong>ข้อความที่เสนอ:</strong> <span class="text-slate-600">${escapeHtml(p.proposed_content || '-')}</span></div>
+        <div><strong>เหตุผลความจำเป็น:</strong> <span class="text-slate-600">${escapeHtml(p.reason || '-')}</span></div>
       </div>`;
     });
   }
@@ -957,13 +980,23 @@ app.get('/api/export', async (c) => {
   `;
   const { results: resultsPart1 } = await c.env.DB.prepare(queryPart1).all();
 
-  const headersPart1 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ข้อที่', 'หน้าที่และอำนาจตามประกาศ', 'หน่วยงานมีการดำเนินงานตามภารกิจนี้หรือไม่', 'ปัญหา/อุปสรรค', 'ข้อคิดเห็นต่อหน้าที่และอำนาจนี้', 'ข้อเสนอแนะเพิ่มเติม'];
-  const dataPart1 = [headersPart1];
+  const headersPart1 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ข้อที่', 'หน้าที่และอำนาจตามประกาศ', 'หน่วยงานมีการดำเนินงานตามภารกิจนี้หรือไม่', 'ปัญหา/อุปสรรค', 'ความเห็นต่อความเหมาะสมของภารกิจนี้', 'ข้อเสนอแนะเพิ่มเติม'];
+  const dataPart1: any[][] = [headersPart1];
   for (const row of (resultsPart1 || [])) {
     dataPart1.push([
-      row.dept_id, row.dept_name, row.status === 'submitted' ? 'ส่งแล้ว' : 'ยังไม่ส่ง',
-      row.respondent_name, row.respondent_position, row.respondent_phone, formatThaiDate(row.submitted_at as string),
-      row.item_order, row.mandate_content, row.has_action, row.problems, row.keep_status, row.suggestion
+      row.dept_id,
+      row.dept_name,
+      row.status === 'submitted' ? 'ส่งแล้ว' : 'ยังไม่ส่ง',
+      safeExcel(row.respondent_name),
+      safeExcel(row.respondent_position),
+      safeExcel(row.respondent_phone),
+      formatThaiDate(row.submitted_at as string),
+      row.item_order,
+      safeExcel(row.mandate_content),
+      safeExcel(row.has_action),
+      safeExcel(row.problems),
+      safeExcel(row.keep_status),
+      safeExcel(row.suggestion)
     ]);
   }
 
@@ -978,15 +1011,21 @@ app.get('/api/export', async (c) => {
   const { results: resultsPart2 } = await c.env.DB.prepare(queryPart2).all();
 
   const headersPart2 = ['รหัสสำนัก', 'ชื่อสำนัก', 'สถานะ', 'ชื่อผู้ตอบ', 'ตำแหน่ง', 'เบอร์โทรศัพท์', 'วันที่ส่ง', 'ลำดับข้อเสนอ', 'ข้อความหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม', 'เหตุผลความจำเป็น'];
-  const dataPart2 = [headersPart2];
+  const dataPart2: any[][] = [headersPart2];
   for (const row of (resultsPart2 || [])) {
     dataPart2.push([
-      row.dept_id, row.dept_name, row.status === 'submitted' ? 'ส่งแล้ว' : 'ยังไม่ส่ง',
-      row.respondent_name, row.respondent_position, row.respondent_phone, formatThaiDate(row.submitted_at as string),
-      row.item_order, row.proposed_content, row.reason
+      row.dept_id,
+      row.dept_name,
+      row.status === 'submitted' ? 'ส่งแล้ว' : 'ยังไม่ส่ง',
+      safeExcel(row.respondent_name),
+      safeExcel(row.respondent_position),
+      safeExcel(row.respondent_phone),
+      formatThaiDate(row.submitted_at as string),
+      row.item_order,
+      safeExcel(row.proposed_content),
+      safeExcel(row.reason)
     ]);
   }
-
   // สร้างไฟล์ Excel (.xlsx) ด้วยไลบรารี xlsx
   const wb = XLSX.utils.book_new();
   const ws1 = XLSX.utils.aoa_to_sheet(dataPart1);
