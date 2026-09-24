@@ -516,13 +516,26 @@ app.get('/', (c) => {
       });
 
       const proposals = [];
-      proposalsContainer.querySelectorAll('.proposal-row').forEach(function(pr) {
-        const cVal = pr.querySelector('.prop-content').value.trim();
-        const rVal = pr.querySelector('.prop-reason').value.trim();
-        if (cVal || rVal) {
-          proposals.push({ content: cVal, reason: rVal });
-        }
-      });
+
+for (const pr of proposalsContainer.querySelectorAll('.proposal-row')) {
+
+  const cVal = pr.querySelector('.prop-content').value.trim();
+  const rVal = pr.querySelector('.prop-reason').value.trim();
+
+  if ((cVal && !rVal) || (!cVal && rVal)) {
+    alert(
+      'กรุณากรอก "ข้อความหน้าที่และอำนาจใหม่" และ "เหตุผลความจำเป็น" ให้ครบถ้วน'
+    );
+    return;
+  }
+
+  if (cVal && rVal) {
+    proposals.push({
+      content: cVal,
+      reason: rVal
+    });
+  }
+}
 
       const payload = {
         respondentName: rName,
@@ -819,6 +832,21 @@ app.post('/api/dept/:id/submit', async (c) => {
   const deptId = c.req.param('id');
   const body = await c.req.json();
   const { respondentName, respondentPosition, respondentPhone, responses, proposals } = body;
+  if (!respondentName?.trim()) {
+    return c.json({ error: 'กรุณาระบุชื่อผู้ตอบ' }, 400);
+  }
+  
+  if (!respondentPosition?.trim()) {
+    return c.json({ error: 'กรุณาระบุตำแหน่ง' }, 400);
+  }
+  
+  if (!respondentPhone?.trim()) {
+    return c.json({ error: 'กรุณาระบุเบอร์โทรศัพท์' }, 400);
+  }
+  
+  if (!Array.isArray(responses) || responses.length === 0) {
+    return c.json({ error: 'ไม่พบข้อมูลคำตอบ' }, 400);
+  }
   // Validation ความยาวข้อมูล
 if ((respondentName || '').length > 50) {
   return c.json({ error: 'ชื่อผู้ตอบต้องไม่เกิน 50 ตัวอักษร' }, 400);
