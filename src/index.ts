@@ -408,11 +408,11 @@ app.get('/', (c) => {
               '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
                 '<div>' +
                   '<label class="block text-xs font-semibold text-slate-600 mb-1">ปัญหา / อุปสรรคในการปฏิบัติงานตามภารกิจนี้ (ถ้ามี)</label>' +
-                  '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุปัญหาหรืออุปสรรค..."></textarea>' +
+                  '<textarea maxlength="3000" rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุปัญหาหรืออุปสรรค..."></textarea>' +
                 '</div>' +
                 '<div>' +
                   '<label class="block text-xs font-semibold text-slate-600 mb-1">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label>' +
-                  '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุข้อเสนอแนะเพิ่มเติม..."></textarea>' +
+                  '<textarea maxlength="3000" rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุข้อเสนอแนะเพิ่มเติม..."></textarea>' +
                 '</div>' +
               '</div>';
 
@@ -444,11 +444,11 @@ app.get('/', (c) => {
         '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
           '<div>' +
             '<label class="block text-xs font-semibold text-slate-600 mb-1.5">ข้อความหน้าที่และอำนาจใหม่ที่ควรเพิ่มเติม</label>' +
-            '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs prop-content bg-white" placeholder="ระบุข้อความอำนาจหน้าที่..."></textarea>' +
+            '<textarea maxlength="2000" rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs prop-content bg-white" placeholder="ระบุข้อความอำนาจหน้าที่..."></textarea>' +
           '</div>' +
           '<div>' +
             '<label class="block text-xs font-semibold text-slate-600 mb-1.5">เหตุผลความจำเป็น / รายละเอียดโดยสังเขป</label>' +
-            '<textarea rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs prop-reason bg-white" placeholder="ระบุเหตุผลความจำเป็น..."></textarea>' +
+            '<textarea maxlength="2000" rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs prop-reason bg-white" placeholder="ระบุเหตุผลความจำเป็น..."></textarea>' +
           '</div>' +
         '</div>';
 
@@ -819,7 +819,18 @@ app.post('/api/dept/:id/submit', async (c) => {
   const deptId = c.req.param('id');
   const body = await c.req.json();
   const { respondentName, respondentPosition, respondentPhone, responses, proposals } = body;
+  // Validation ความยาวข้อมูล
+if ((respondentName || '').length > 50) {
+  return c.json({ error: 'ชื่อผู้ตอบต้องไม่เกิน 5 ตัวอักษร' }, 400);
+}
 
+if ((respondentPosition || '').length > 50) {
+  return c.json({ error: 'ตำแหน่งต้องไม่เกิน 50 ตัวอักษร' }, 400);
+}
+
+if ((respondentPhone || '').length > 20) {
+  return c.json({ error: 'เบอร์โทรศัพท์ต้องไม่เกิน 20 ตัวอักษร' }, 400);
+}
   const currentDept = await c.env.DB.prepare('SELECT status FROM departments WHERE id = ?').bind(deptId).first<{ status: string }>();
   if (!currentDept) return c.json({ error: 'ไม่พบข้อมูลส่วนราชการนี้' }, 404);
   if (currentDept.status === 'submitted') return c.json({ error: 'แบบสอบถามนี้ได้ส่งเรียบร้อยแล้ว' }, 403);
